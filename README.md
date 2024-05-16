@@ -75,7 +75,7 @@ Expressions are represented as Prolog terms of different complexity levels:
 
 - fractions: `frac(X,Y)`, where $X\in\mathbb{Z}$ and $Y\in\mathbb{N}$
 - `typeX`: $x^n$, where $X$ is an atom and $n$ is a fraction
-- `typeB`: $a*X+b$, where $X$ is `typeX` and $a,\,b$ are fractions
+- `typeB`: $aX+b$, where $X$ is `typeX` and $a,b$ are fractions
 - `typeBB`: $X+b$, where $X$ is `typeX` and $b$ is a fraction
 - `typeC`: $a\cdot B_1^{n_1}\cdot B_2^{n_2}\cdots B_k^{n_k}$, where $B_i$ are of `typeBB` and $a$ is a fraction
 - `typeD`: $C_1+C_2+\cdots+C_k + a$, where $C_i$ are of `typeC` and $a$ is a fraction
