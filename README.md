@@ -15,8 +15,7 @@ If the result is too long, prolog wont display the whole thing by default. You c
 
 ## Examples
 
-$11+4\cdot1\cdot(2x+y)\cdot((2\frac{4}{3}+x)z+y)\cdot3 + 10
-\\= 24xz(x+\frac{8}{3})+12yz(x+\frac{8}{3})+24xy+12y^2+21$
+$$11+4\cdot1\cdot(2x+y)\cdot((2\frac{4}{3}+x)z+y)\cdot3 + 10= 24xz(x+\frac{8}{3})+12yz(x+\frac{8}{3})+24xy+12y^2+21$$
 
 ```prolog
 ?- simp(11+4*1*(2*x+y)*((2*4/3+x)*z+y)*3 + 10, X).
