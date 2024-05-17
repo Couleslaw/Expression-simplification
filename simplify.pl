@@ -1,4 +1,85 @@
 :- discontiguous s/4.
+:- discontiguous s/3.
+:- discontiguous f/1.
+:- discontiguous inverz/2.
+
+even(X) :-
+    integer(X),    
+    0 is X mod 2.  
+
+odd(X) :-
+    integer(X),    
+    1 is X mod 2.
+
+% =========== functions ===========
+% INVERSE FUNCTION LOGIC
+s(Func, X, V) :- 
+    X = frac(1,1)*ZZ^frac(1,1)+frac(0,1),
+    ZZ =.. [InvFunc, Arg],
+    inverz(Func, InvFunc),
+    V = Arg, !.
+
+% SIN
+f(sin).
+s(sin,frac(0,1),frac(0,1)) :- !.
+s(sin,frac(_,1)*pi^frac(1,1)+frac(0,1),frac(0,1)) :- !.
+s(sin,X,sin(X)) :- !. 
+
+% ARCSIN
+f(asin).
+s(asin,frac(0,1),frac(0,1)) :- !.
+s(asin,X,asin(X)) :- !.
+
+inverz(sin,asin) :- !.
+inverz(asin,sin) :- !.
+
+% COS
+f(cos).
+s(cos,frac(0,1),frac(1,1)) :- !.
+s(cos,frac(X,1)*pi^frac(1,1)+frac(0,1),frac(1,1)) :- even(X), !.
+s(cos,frac(X,1)*pi^frac(1,1)+frac(0,1),frac(-1,1)) :- odd(X), !.
+s(cos,X,cos(X)) :- !.
+
+% ARCCOS
+f(acos).
+s(acos,frac(1,1),frac(0,1)) :- !.
+s(acos,X,acos(X)) :- !.
+
+inverz(cos,acos) :- !.
+inverz(acos,cos) :- !.
+
+% TAN
+f(tan).
+s(tan,frac(0,1),frac(0,1)) :- !.
+s(tan,frac(_,1)*pi^frac(1,1)+frac(0,1),frac(0,1)) :- !.
+s(tan,X,tan(X)) :- !.
+
+% ARCTAN
+f(atan).
+s(atan,frac(0,1),frac(0,1)) :- !.
+s(atan,X,atan(X)) :- !.
+
+inverz(tan,atan) :- !.
+inverz(atan,tan) :- !.
+
+% LOG
+f(log).
+s(log,frac(1,1),frac(0,1)) :- !.
+s(log,frac(1,1)*e^X+frac(0,1),X) :- !.
+s(log,X,log(X)) :- !.
+
+% EXP
+f(exp).
+s(exp,frac(0,1),frac(1,1)) :- !.
+
+inverz(log,exp) :- !.
+inverz(exp,log) :- !.
+
+function(X) :-
+    % Ensure Term is of the form f(X)
+    X =.. [Functor, _],
+    % Check if f(Functor) is true
+    f(Functor).
 
 % ============ CLASS frac ============
 frac(N) :- N=frac(X,Y), frac(X,Y).
@@ -48,7 +129,10 @@ s(^,F,frac(C,D),V) :-
 
 
 % ============= CLASS X ==============
-typeX(X^N) :- atom(X), frac(N).
+basic(X) :- atom(X), !.
+basic(X) :- function(X), !.
+typeX(X^N) :- frac(N), basic(X), !.
+
 % ============= CLASS B ============== 
 typeB(A*X+F) :- frac(A), frac(F), typeX(X).
 
@@ -530,11 +614,19 @@ write_char(A,Char) :- write(Char), A1 is A-1, write_char(A1,Char).
 debug_split(A, Op, V, L, P) :- 
     write(A),write_char(A,'-'),write('> '),
     write(V),write('  =  '),write(L),write('  '),write(Op),write('  '),writeln(P).
+debug_split(A, Func, V, X) :- 
+    write(A),write_char(A,'-'),write('> '),
+    write(V),write('  =  '),write(Func),write('(   '),write(X),writeln('   )').
 debug_combine(A, Op, V, L, P) :- 
     write(A),write_char(A,'='),write('> '),
     typeof(L,LT),typeof(P,PT),typeof(V,VT),
     write(LT),write(Op),write(PT),write('='),write(VT),write(': '),
     write(L),write('  '),write(Op),write('  '),write(P),write('  =  '),writeln(V).
+debug_combine(A, Func, V, X) :-
+    write(A),write_char(A,'='),write('> '),
+    typeof(X,XT),typeof(V,VT),
+    write(Func),write('('),write(XT),write(')'),write('='),write(VT),write(': '),
+    write(Func),write('(   '),write(X),write('   )  =  '),writeln(V).
 
 % =============== main logic ====================
 
@@ -564,8 +656,32 @@ simp(V,V,_, n,_) :- (atomic(V) ; integer(V)), !.
 simp(frac(X,Y),ZF,_,s,_) :- frac(X,Y), s(frac,X,Y,ZF), !. % zlomek v zakladnim tvaru
 simp(V,frac(V,1),_, s,_) :- integer(V), !.
 simp(A/B,frac(A,B),_,_,_) :- frac(A,B), !.
+simp(V,frac(1,1)*V^frac(1,1)+frac(0,1),_, s,_) :- atom(V), !.
 simp(V^N,frac(1,1)*V^frac(N,1)+frac(0,1),_,s,_) :- atom(V),integer(N), !.
-simp(V,frac(1,1)*V^frac(1,1)+frac(0,1),_, s,_) :- atom(V),!.
+
+simp(V,ZV,A, Alg, Debug) :- 
+    V =.. [Func,X],
+    (
+        Debug = true
+        -> debug_split(A,Func,V,X)
+        ;  true
+    ), 
+    A1 is A+1, simp(X,ZX,A1,Alg,Debug),
+    (
+        Alg=s
+        -> call(s,Func,ZX,ZVV), 
+            (
+                function(ZVV)
+                -> ZV = frac(1,1)*ZVV^frac(1,1)+frac(0,1)
+                ;  ZV = ZVV
+            )
+        ;  ZV=.. [Func,ZX]
+    ), 
+    (
+        Debug = true
+        -> debug_combine(A,Func,ZV,ZX)
+        ;  true
+    ), !.
 
 simp(V,ZV,A, Alg, Debug) :- 
     V =.. [Op,La,Pa],
