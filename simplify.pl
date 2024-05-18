@@ -12,9 +12,19 @@ odd(X) :-
     1 is X mod 2.
 
 % =========== functions ===========
+
+function(X) :-
+    % Ensure Term is of the form f(X)
+    X =.. [Functor, _],
+    % Check if f(Functor) is true
+    f(Functor).
+
+
 % INVERSE FUNCTION LOGIC
 s(Func, X, V) :- 
+    f(Func),
     X = frac(1,1)*ZZ^frac(1,1)+frac(0,1),
+    function(ZZ),
     ZZ =.. [InvFunc, Arg],
     inverz(Func, InvFunc),
     V = Arg, !.
@@ -75,11 +85,36 @@ s(exp,frac(0,1),frac(1,1)) :- !.
 inverz(log,exp) :- !.
 inverz(exp,log) :- !.
 
-function(X) :-
-    % Ensure Term is of the form f(X)
-    X =.. [Functor, _],
-    % Check if f(Functor) is true
-    f(Functor).
+% SQRT
+f(sqrt).
+s(sqrt,frac(X,Y),V) :-
+    X > 0,
+    SX is sqrt(X), is_float_int(SX),
+    SY is sqrt(Y), is_float_int(SY),
+    round(SX,RSX), round(SY,RSY),
+    V=frac(RSX,RSY), !.
+s(sqrt,X^frac(A,B),V) :-
+    even(A), A1 is A//2,
+    V=X^frac(A1,B), !.
+s(sqrt,X*Y^frac(A,B)+frac(0,1),V) :-
+    s(sqrt,X,SX),
+    s(sqrt,Y^frac(A,B),SQRT),
+    (
+        SX=.. [sqrt,_]
+        ->( 
+            SQRT=.. [sqrt,_]
+            -> s(*,SX,SQRT,V)
+            ;  V=(SQRT+frac(0,1))^frac(1,1)*(SX^frac(1,1)+frac(0,1))^frac(1,1)
+        )
+        ; (
+            SQRT=.. [sqrt,_]
+            -> V=SX*SQRT^frac(1,1)+frac(0,1)
+            ;  s(*,SX,frac(1,1)*SQRT+frac(0,1),V)
+        )
+    ), !.
+s(*,sqrt(X),sqrt(Y),sqrt(V)) :- 
+    s(*,X,Y,V), !.
+s(sqrt,X,sqrt(X)) :- !.
 
 % ============ CLASS frac ============
 frac(N) :- N=frac(X,Y), frac(X,Y).
@@ -603,8 +638,11 @@ n(frac,A,B,frac(A,B)) :- frac(A,B).
 
 % ================ debug utils ================== 
 typeof(VZ, 'F') :- frac(VZ), !.
+typeof(VZ, 'X') :- typeX(VZ), !.
 typeof(VZ, 'B') :- typeB(VZ), !.
+typeof(VZ, 'BB') :- typeBB(VZ), !.
 typeof(VZ, 'C') :- typeC(VZ), !.
+typeof(VZ, 'CC') :- typeCC(VZ), !.
 typeof(VZ, 'D') :- typeD(VZ), !.
 typeof(VZ, 'DD') :- typeDD(VZ), !.
 typeof(_, '_').
