@@ -182,7 +182,7 @@ The simplification is done by recursively applying a set of rules to the express
 Expressions are represented as Prolog terms of different complexity levels:
 
 - fractions: `frac(X,Y)`, where $X\in\mathbb{Z}$ and $Y\in\mathbb{N}$
-- `typeX`: $x^n$, where $X$ is a variable or a function like `sin(...)` and $n$ is a `frac`
+- `typeX`: $X^n$, where $X$ is a variable or a function like `sin(...)` and $n$ is a `frac`
 - `typeBB`: $X+b$, where $X$ is `typeX` and $b$ is a `frac`
 - `typeB`: $aX+b$, where $X$ is `typeX` and $a,b$ are `frac`
 - `typeCC`: $B_1^{n_1}\cdot B_2^{n_2}\cdots B_k^{n_k}$, where $B_i$ are of `typeBB` and $n_i$ are `frac`
