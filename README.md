@@ -87,7 +87,7 @@ X = 0.
 X = (a^4+2)^2.
 ```
 
-### Trigonometric simplification
+### Trigonometric functions
 
 The variable `pi` is recognized as the mathematical constant $\pi$. The program knows the following values:
 
