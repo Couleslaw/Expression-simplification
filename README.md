@@ -36,7 +36,7 @@ Constants are variables which get special treatment in some cases. The following
 - `pi` - the mathematical constant $\pi$
 - `e` - the base of the natural logarithm $e$
 
-The most basic simplification for a function $f$ is $f(f^{-1}(x))=x$. This is why there is a separate file for defining inverse functions. Too instruct the program to treat functions `func1` and `func2` as inverses of each other, simply add the following like to the `inverse.pl` file:
+The most basic simplification for a function $f$ is $f(f^{-1}(x))=x$. This is why there is a separate file for defining inverse functions. Too instruct the program to treat functions `func1` and `func2` as inverses of each other, simply add the following line to the `inverse.pl` file:
 
 ```prolog
 inverse(func1,func2).
@@ -48,7 +48,6 @@ It isn't difficult to add more complex rules, but it requires some understanding
 
 ### Polynomial simplification
 
-Where this program shines is in simplifying polynomials. For example, consider the following expressions:
 $$11+4\cdot1\cdot(2x+y)\cdot\Bigl((2\frac{4}{3}+x)z+y\Bigr)\cdot3 + 10= 24xz\Bigl(x+\frac{8}{3}\Bigr)+12yz\Bigl(x+\frac{8}{3}\Bigr)+24xy+12y^2+21$$
 
 ```prolog
@@ -90,7 +89,7 @@ X = (a^4+2)^2.
 
 ### Trigonometric simplification
 
-The variable `pi` is recognized as the mathematical constant $\pi$. It knows the following values:
+The variable `pi` is recognized as the mathematical constant $\pi$. The program knows the following values:
 
 - $\sin(k\pi)=0$
 - $\sin(\pi/2+2k\pi)=1$
@@ -107,7 +106,7 @@ X = 1.
 
 ### Logarithms and exponentials
 
-The variable `e` is recognized as the base of the natural logarithm and so `e^x` is equivalent to `exp(x)` in some basic cases. It is however recommended to use `exp` is more complex expressions, as it might simplify further.
+The variable `e` is recognized as the base of the natural logarithm and so `e^x` is equivalent to `exp(x)` in some basic cases. It is however recommended to use `exp` in more complex expressions, as it might simplify further.
 
 - $\log(a\cdot b)=\log(a)+\log(b)$
 - $\log(a^n)=n\log(a)$
@@ -115,7 +114,6 @@ The variable `e` is recognized as the base of the natural logarithm and so `e^x`
 - $\exp(x)\exp(y)=\exp(x+y)$
 - $\exp(a\log(x)+y)=x^a+\exp(y)$
 
-Consider the following examples:
 $$\log\bigl(2(\sqrt{x})^3\bigr)=\frac{3}{2}\log(x)+\log(2)$$
 
 ```prolog
@@ -179,7 +177,7 @@ X = 2*x^2+4*x+2.
 
 ## Limitations
 
-It is not perfect and may not simplify some expressions as much as you would like. This is the case especially for polynomial division. The most complex polynomial division it can do is
+The program is not perfect and may not simplify some expressions as much as you would like. This is the case especially for polynomial division. The most complex polynomial division it can do is
 
 $$\frac{kax^n+kb}{ax^n+b}=k.$$
 
@@ -187,7 +185,7 @@ $$\frac{kax^n+kb}{ax^n+b}=k.$$
 
 The simplification is done by recursively applying a set of rules to the expression until it can no longer be simplified. The rules are based on the properties of arithmetic operations and the distributive property.
 
-Expressions are represented as Prolog terms of different complexity levels:
+Expressions are represented as Prolog terms of different complexity:
 
 - fractions: `frac(X,Y)`, where $X\in\mathbb{Z}$ and $Y\in\mathbb{N}$
 - `typeX`: $X^n$, where $X$ is a variable or a function like `sin(...)` and $n$ is a `frac`
@@ -202,7 +200,7 @@ Note that when you add or multiply two expressions of `typeD`, you get either `t
 
 The simplification process first converts all variables to `typeB` and then recursively applies simplification rules using the tree-like structure of the expression. After it has simplified the expression in this internal representation, it converts it into a more human readable form. You can see the logic of the program by running `simpDebug/2`. Let's look at an example to explain what is going on.
 
-The stuff above the line is simplifying the expression, while the stuff below the line is converting the simplified expression into human readable form. Lines starting with `%` are comments, that are not part of the output.
+The stuff above the line is simplifying the expression, while the stuff below the line is converting the simplified expression into human readable form. Lines starting with `%` are comments and are not part of the output.
 
 ```prolog
 ?- simpDebug(sin(a-a)+sqrt(4*x),X).
@@ -244,7 +242,7 @@ frac(2,1)*sqrt(x^frac(1,1))^frac(1,1)+frac(0,1)
 X = 2*sqrt(x).
 ```
 
-### Adding rules for new functions
+### Adding new rules
 
 Let's say that you need this program to simplify expressions containing hyperbolic functions like `sinh` or `cosh`, which are not built-in. Lets see what happens when we try to simplify such an expression:
 
@@ -253,7 +251,7 @@ Let's say that you need this program to simplify expressions containing hyperbol
 X = a*sinh(0)+x+1.
 ```
 
-It simplifies the argument of `sinh` to `0`, but it doesn't know that `sinh(0)=0`, so it doesn't simplify `a*sinh(0)` to `0`. To add this rule, we need to modify the `simplify.pl` file. If you look through the file, you will see how this is done for `sin`:
+The program simplifies the argument of `sinh` to `0`, but it doesn't know that `sinh(0)=0`, so it doesn't simplify `a*sinh(0)` to `0`. To add this rule, we need to modify the `simplify.pl` file. If you look through the file, you will see how this is done for `sin`:
 
 ```prolog
 s(sin,frac(0,1),frac(0,1)) :- !.
@@ -273,7 +271,7 @@ To instruct the program to treat `sinh` and `arcsinh` as inverse functions, add 
 inverse(sinh,arcsinh).
 ```
 
-Now the program will simplify the expression as expected:
+Now the program will simplify the expressions as expected:
 
 ```prolog
 ?- simp(2+x+a*sinh(x^2-x*x)-1,X).
