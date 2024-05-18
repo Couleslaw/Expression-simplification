@@ -191,6 +191,11 @@ s(*,SQRT1,SQRT2,V) :-
     s(^,SQRT1,frac(2,1),V), !.
 
 s(*,SQRT1,SQRT2,V) :-
+    SQRT1=frac(1,1)*sqrt(X)^frac(1,1)+frac(0,1),
+    SQRT2=frac(1,1)*sqrt(X)^frac(1,1)+frac(0,1),
+    s(^,SQRT1,frac(2,1),V), !.
+
+s(*,SQRT1,SQRT2,V) :-
     SQRT1=(sqrt(X)^frac(1,1)+frac(0,1))^frac(1,1),
     SQRT2=(sqrt(Y)^frac(1,1)+frac(0,1))^frac(1,1),
     s(*,X,Y,Z),
@@ -214,13 +219,9 @@ s(^,SQRT,frac(A,B),V) :-
     even(A), A1 is A//2,
     SQRT=(sqrt(X)^frac(1,1)+frac(0,1))^frac(1,1) * F,
     s(^,F,frac(A,B),VF),
-    % (
-    %     frac(X)
-    %     -> s(^,X,frac(A1,B),VX)
-    %     ;  VX = (X^frac(1,1)+frac(0,1))^frac(A1,B)
-    % ),
     s(^,X,frac(A1,B),VX),
     s(*,VX,VF,V), !.
+
 % if nothing else matches
 s(Func,X,V) :-V=..[Func,X], !.
 
@@ -348,7 +349,7 @@ s(^,X*Y,F,V) :-
     frac(F), 
     s(^,X,F,XF),
     s(^,Y,F,YF),
-    V = XF * YF, !.
+    s(*,XF,YF,V), !.
 s(^,X+Y,frac(N,1),V) :-
     \+typeB(X+Y), \+typeBB(X+Y),
     N > 1, N1 is N-1,
@@ -471,17 +472,33 @@ s(*,B^N, B1^M, CC1) :-
 s(*,CC * B^N, B^M, CC1) :- 
     typeCC(CC * B^N), typeCC(B^M),
     s(*,B^N, B^M, CC0),
-    CC1 = CC * CC0, !.
+    (
+        frac(CC0)
+        -> s(*,CC,CC0,CC1)
+        ;  CC1 = CC * CC0
+    ), !.
 
 s(*,CC * B^N, B1^M, CC1) :- 
     typeCC(CC * B^N), typeCC(B1^M),
     s(*,CC, B1^M, Zbytek),
-    CC1 = Zbytek * B^N, !.
+    (
+        frac(Zbytek)
+        -> s(*,B^N, Zbytek, CC1)
+        ; (
+            (Zbytek=ZZ*F, frac(F))
+            -> CC1=ZZ * B^N * F
+            ;  CC1 = Zbytek * B^N
+        )
+    ), !.
 
 s(*,CC1, CC2 * B^N, CC) :-
     typeCC(CC1), typeCC(CC2 * B^N),
     s(*,CC1,CC2,Zbytek),
-    s(*,Zbytek,B^N,CC), !.
+    (
+        (Zbytek=ZZ*F, frac(F))
+        -> s(*,ZZ,B^N,CC0), CC = CC0 * F
+        ;  s(*,Zbytek,B^N,CC)
+    ), !.
 
 s(/,CC1, CC2, CC) :-
     typeCC(CC1), typeCC(CC2),

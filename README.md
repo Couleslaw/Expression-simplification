@@ -158,15 +158,23 @@ X = exp(2*a+b)*a.
 
 ### Square roots
 
-The square root function is recognized as `sqrt`. This should be equivalent to `^(1/2)`, but using `sqrt` is preferred.
+The square root function is recognized as `sqrt`. Note that `^(1/2)` is equivalent to `sqrt` in some basic cases, but should generally be avoided.
 $$\sqrt{(a+2)\cdot4\cdot\sqrt{(b^2-1)^4}(x-1)(1+a+1)}=2(b^2-1)\sqrt{x-1}(a+2)$$
 
 ```prolog
 ?- simp(sqrt((a+2)*4*sqrt((b^2-1)^4)*(x-1)*(1+a+1)),X).
 X = 2*((b^2-1)*sqrt(x-1)*(a+2)).
+```
 
-?- simp(((a+2)*4*sqrt((b^2-1)^4)*(x-1)*(1+a+1))^(1/2),X).
-X = 2*((b^2-1)*(x-1)^(1/2)*(a+2)).
+```prolog
+?- simp((sqrt(2)+sqrt(2))^2,X).
+X = 8.
+
+?- simp((x*(sqrt(2)+sqrt(2)))^2,X).
+X = 8*x^2.
+
+?- simp((x*sqrt(2)+sqrt(2))^2,X).
+X = 2*x^2+4*x+2.
 ```
 
 ## Limitations
