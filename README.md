@@ -60,8 +60,12 @@ $$(2x+4)(a+2)\cdot2+\Bigl(a+1+\frac{y}{y}\Bigr)(2+x)=5(x+2)(a+2)$$
 ```prolog
 ?- simp((2*x+4)*(a+2)*2 + (a+1+y/y)*(2+x),X).
 X = 5*((x+2)*(a+2)).
+```
 
-?- simp((a*x-((x+a)^2 -x^2-a^2-a*x)),X).
+$$ax-((x+a)^2-x^2-a^2-ax)=0$$
+
+```prolog
+?- simp((a*x-((x+a)^2-x^2-a^2-a*x)),X).
 X = 0.
 ```
 
@@ -82,7 +86,11 @@ $$\Bigl(\frac{3}{2}-\frac{6x+9}{4x+6}\Bigr)(a+b)^4=0$$
 ```prolog
 ?- simp((3/2 - (6*x+9)/(4*x+6)) * (a+b)^4,X).
 X = 0.
+```
 
+$$\frac{(a^4+2)^{3/2}}{\frac{1}{(a^4+2)^{1/2}}}=(a^4+2)^{2}$$
+
+```prolog
 ?- simp((a^4+2)^(3/2) / (1/(a^4+2)^(1/2)),X).
 X = (a^4+2)^2.
 ```
@@ -136,7 +144,7 @@ X = 4*log(x+1)+1.
 ```
 
 The next example shows why `exp` is preferred over `e` in more complex cases.
-$$\exp\bigr(4\log(x+1)+1\bigl)=(x+1)^4\cdot e$$
+$$\exp\bigr(4\log(x+1)+1\bigl)=e\cdot(x+1)^4$$
 
 ```prolog
 ?- simp(e^(4*log(x+1)+1),X).
@@ -146,10 +154,9 @@ X = e^(4*log(x+1)+1).
 X = (x+1)^4*e.
 ```
 
-```prolog
-?- simp(e^(a+log(a)+b+a),X).
-X = e^(2*a+b+log(a)).
+$$\exp(a+log(a)+b+a)=a\cdot\exp(2a+b)$$
 
+```prolog
 ?- simp(exp(a+log(a)+b+a),X).
 X = exp(2*a+b)*a.
 ```
@@ -164,13 +171,23 @@ $$\sqrt{(a+2)\cdot4\cdot\sqrt{(b^2-1)^4}(x-1)(1+a+1)}=2(b^2-1)\sqrt{x-1}(a+2)$$
 X = 2*((b^2-1)*sqrt(x-1)*(a+2)).
 ```
 
+$$(\sqrt2+\sqrt2)^2=8$$
+
 ```prolog
 ?- simp((sqrt(2)+sqrt(2))^2,X).
 X = 8.
+```
 
+$$\bigl(x(\sqrt2+\sqrt2)\bigr)^2=8x^2$$
+
+```prolog
 ?- simp((x*(sqrt(2)+sqrt(2)))^2,X).
 X = 8*x^2.
+```
 
+$$(x\sqrt2+\sqrt2)^2=2x^2+4x+2$$
+
+```prolog
 ?- simp((x*sqrt(2)+sqrt(2))^2,X).
 X = 2*x^2+4*x+2.
 ```
