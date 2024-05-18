@@ -235,3 +235,42 @@ frac(2,1)*sqrt(x^frac(1,1))^frac(1,1)+frac(0,1)
 1=> _+_=_: 2*sqrt(x)  +  0  =  2*sqrt(x)
 X = 2*sqrt(x).
 ```
+
+### Adding rules for new functions
+
+Let's say that you need this program to simplify expressions containing hyperbolic functions like `sinh` or `cosh`, which are not built-in. Lets see what happens when we try to simplify such an expression:
+
+```prolog
+?- simp(2+x+a*sinh(x^2-x*x)-1,X).
+X = a*sinh(0)+x+1.
+```
+
+It simplifies the argument of `sinh` to `0`, but it doesn't know that `sinh(0)=0`, so it doesn't simplify `a*sinh(0)` to `0`. To add this rule, we need to modify the `simplify.pl` file. If you look through the file, you will see how this is done for `sin`:
+
+```prolog
+s(sin,frac(0,1),frac(0,1)) :- !.
+```
+
+`s(+function, +argument, -result)` is a predicate that defines the simplification rule for a function. Since we represent numbers as fractions, we need to convert the number `0` to `frac(0,1)`. Note the cut `!` at the end of the rule, which prevent backtracking.
+
+To add a rule for `sinh`, we need to add the following line to the 'functions' section:
+
+```prolog
+s(sinh,frac(0,1),frac(0,1)) :- !.
+```
+
+To instruct the program to treat `sinh` and `arcsinh` as inverse functions, add the following line to the `inverse.pl` file:
+
+```prolog
+inverse(sinh,arcsinh).
+```
+
+Now the program will simplify the expression as expected:
+
+```prolog
+?- simp(2+x+a*sinh(x^2-x*x)-1,X).
+X = x+1.
+
+? - simp(arcsinh(sinh(x)),X).
+X = x.
+```
