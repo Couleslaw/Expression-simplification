@@ -47,6 +47,8 @@ s(Func, X, V) :-
 % SIN
 s(sin,frac(0,1),frac(0,1)) :- !.
 s(sin,frac(_,1)*pi^frac(1,1)+frac(0,1),frac(0,1)) :- !.
+s(sin,frac(A,2)*pi^frac(1,1)+frac(0,1),frac(1,1)) :- A1 is (A-1)//2, even(A1), !.
+s(sin,frac(A,2)*pi^frac(1,1)+frac(0,1),frac(-1,1)) :- A1 is (A-1)//2, odd(A1), !.
 
 % ARCSIN
 s(asin,frac(0,1),frac(0,1)) :- !.
@@ -56,6 +58,8 @@ s(arcsin,frac(0,1),frac(0,1)) :- !.
 s(cos,frac(0,1),frac(1,1)) :- !.
 s(cos,frac(X,1)*pi^frac(1,1)+frac(0,1),frac(1,1)) :- even(X), !.
 s(cos,frac(X,1)*pi^frac(1,1)+frac(0,1),frac(-1,1)) :- odd(X), !.
+s(cos,frac(_,2)*pi^frac(1,1)+frac(0,1),frac(0,1)) :- !.
+
 
 % ARCCOS
 s(acos,frac(1,1),frac(0,1)) :- !.
@@ -74,11 +78,14 @@ s(log,frac(1,1),frac(0,1)) :- !.
 s(log,frac(1,1)*e^frac(1,1)+frac(0,1),frac(1,1)) :- !.
 s(log,e^frac(1,1)+frac(0,1),frac(1,1)) :- !.
 s(log,(e^frac(1,1)+frac(0,1))^frac(1,1),frac(1,1)) :- !.
-s(log,frac(1,1)*X^Y+frac(0,1),V) :- 
-    Y\=frac(1,1),
+s(log,F*X^Y+frac(0,1),V) :- 
+    (Y\=frac(1,1) ; X=..[sqrt,_]),
+    s(log,F,VF0),
+    make_CC_from_func(VF0,VF),
     s(log,X,V0),
     make_CC_from_func(V0,VX),
-    s(*,VX,Y,V), !.
+    s(*,VX,Y,V00),
+    s(+,V00,VF,V), !.
 s(log,B^N,V) :- 
     N\=frac(1,1),
     typeBB(B),
@@ -97,13 +104,27 @@ s(log,X*Y,V) :-
     make_CC_from_func(VX0,VX),
     make_CC_from_func(VY0,VY),
     s(+,VX,VY,V), !.
+s(log,sqrt(X),V) :-
+    s(*,frac(1,1)*log(X)^frac(1,1)+frac(0,1),frac(1,2),V), !.
 
 % EXP
 s(exp,frac(0,1),frac(1,1)) :- !.
-s(exp,X+Y,V) :- 
-    s(exp,X,VX),
-    s(exp,Y,VY),
+s(exp,X+Y,V) :-
+    \+typeB(X+Y),
+    s(exp,X,VX0),
+    s(exp,Y,VY0),
+    make_CC_from_func(VX0,VX),
+    make_CC_from_func(VY0,VY),
     s(*,VX,VY,V), !.
+s(exp,X*log(Y)^frac(1,1)+F,V) :-
+    frac(F),
+    s(exp,F,E0),
+    make_CC_from_func(E0,E), 
+    s(^,Y,X,Z),
+    s(*,E,Z,V), !.
+s(exp,(log(Y)^frac(1,1)+frac(0,1))^frac(1,1)*X,V) :- 
+    s(^,Y,X,V), !.
+
 s(^,EXP,F,V) :-
     EXP=X*exp(Y)^frac(1,1)+frac(0,1),
     s(^,X,F,VX),
@@ -116,6 +137,18 @@ s(*,EXP1,EXP2,V) :-
     s(*,X1,X2,VX),
     s(+,Y1,Y2,VY),
     V=VX*exp(VY)^frac(1,1)+frac(0,1), !.
+
+s(*,EXP1,EXP2,V) :- 
+    EXP1=(exp(Y1)^frac(1,1)+frac(0,1))^frac(1,1),
+    EXP2=(exp(Y2)^frac(1,1)+frac(0,1))^frac(1,1),
+    s(+,Y1,Y2,VY),
+    make_CC_from_func(exp(VY),V), !.
+s(*,Z*EXP1,EXP2,V) :- 
+    EXP1=(exp(Y1)^frac(1,1)+frac(0,1))^frac(1,1),
+    EXP2=(exp(Y2)^frac(1,1)+frac(0,1))^frac(1,1),
+    s(+,Y1,Y2,VY),
+    make_CC_from_func(exp(VY),V0),
+    s(*,Z,V0,V), !.
 
 % SQRT
 s(sqrt,frac(X,Y),V) :-
@@ -787,6 +820,7 @@ simp(-V,ZV,A,s,Debug) :-
 simp(frac(A,B),-R,_,n,_) :-
     A<0, A1 is -A,
     simp(frac(A1,B),R,_,n,false), !.
+simp(exp(frac(1,1)),e,_,n,_) :- !.
 simp(frac(X,1),X,_,n,_) :- !.
 simp(frac(0,_),0,_,n,_) :- !.
 simp(frac(A,B),A/B,_,n,_) :- !.
