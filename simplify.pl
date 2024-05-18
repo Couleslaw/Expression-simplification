@@ -1,7 +1,8 @@
+% load file with predefined inverse functions
+:- [inverse].
+
 :- discontiguous s/4.
 :- discontiguous s/3.
-:- discontiguous f/1.
-:- discontiguous inverz/2.
 
 even(X) :-
     integer(X),    
@@ -13,80 +14,110 @@ odd(X) :-
 
 % =========== functions ===========
 
-function(X) :-
-    % Ensure Term is of the form f(X)
-    X =.. [Functor, _],
-    % Check if f(Functor) is true
-    f(Functor).
-
+function(X) :- X =.. [_Func, _Arg].
 
 % INVERSE FUNCTION LOGIC
 s(Func, X, V) :- 
-    f(Func),
     X = frac(1,1)*ZZ^frac(1,1)+frac(0,1),
     function(ZZ),
     ZZ =.. [InvFunc, Arg],
-    inverz(Func, InvFunc),
+    (inverse(Func, InvFunc) ; inverse(InvFunc, Func)),
+    V = Arg, !.
+s(Func, X, V) :- 
+    X = (ZZ^frac(1,1)+frac(0,1))^frac(1,1),
+    function(ZZ),
+    ZZ =.. [InvFunc, Arg],
+    (inverse(Func, InvFunc) ; inverse(InvFunc, Func)),
+    V = Arg, !.
+
+s(Func, X, V) :- 
+    X = frac(1,1)*ZZ^frac(1,1),
+    function(ZZ),
+    ZZ =.. [InvFunc, Arg],
+    (inverse(Func, InvFunc) ; inverse(InvFunc, Func)),
+    V = Arg, !.
+
+s(Func, X, V) :- 
+    X = (ZZ^frac(1,1)+frac(0,1))^frac(1,1)*frac(1,1),
+    function(ZZ),
+    ZZ =.. [InvFunc, Arg],
+    (inverse(Func, InvFunc) ; inverse(InvFunc, Func)),
     V = Arg, !.
 
 % SIN
-f(sin).
 s(sin,frac(0,1),frac(0,1)) :- !.
 s(sin,frac(_,1)*pi^frac(1,1)+frac(0,1),frac(0,1)) :- !.
-s(sin,X,sin(X)) :- !. 
 
 % ARCSIN
-f(asin).
 s(asin,frac(0,1),frac(0,1)) :- !.
-s(asin,X,asin(X)) :- !.
-
-inverz(sin,asin) :- !.
-inverz(asin,sin) :- !.
+s(arcsin,frac(0,1),frac(0,1)) :- !.
 
 % COS
-f(cos).
 s(cos,frac(0,1),frac(1,1)) :- !.
 s(cos,frac(X,1)*pi^frac(1,1)+frac(0,1),frac(1,1)) :- even(X), !.
 s(cos,frac(X,1)*pi^frac(1,1)+frac(0,1),frac(-1,1)) :- odd(X), !.
-s(cos,X,cos(X)) :- !.
 
 % ARCCOS
-f(acos).
 s(acos,frac(1,1),frac(0,1)) :- !.
-s(acos,X,acos(X)) :- !.
-
-inverz(cos,acos) :- !.
-inverz(acos,cos) :- !.
+s(arccos,frac(1,1),frac(0,1)) :- !.
 
 % TAN
-f(tan).
 s(tan,frac(0,1),frac(0,1)) :- !.
 s(tan,frac(_,1)*pi^frac(1,1)+frac(0,1),frac(0,1)) :- !.
-s(tan,X,tan(X)) :- !.
 
 % ARCTAN
-f(atan).
 s(atan,frac(0,1),frac(0,1)) :- !.
-s(atan,X,atan(X)) :- !.
-
-inverz(tan,atan) :- !.
-inverz(atan,tan) :- !.
+s(arctan,frac(0,1),frac(0,1)) :- !.
 
 % LOG
-f(log).
 s(log,frac(1,1),frac(0,1)) :- !.
-s(log,frac(1,1)*e^X+frac(0,1),X) :- !.
-s(log,X,log(X)) :- !.
+s(log,frac(1,1)*e^frac(1,1)+frac(0,1),frac(1,1)) :- !.
+s(log,e^frac(1,1)+frac(0,1),frac(1,1)) :- !.
+s(log,(e^frac(1,1)+frac(0,1))^frac(1,1),frac(1,1)) :- !.
+s(log,frac(1,1)*X^Y+frac(0,1),V) :- 
+    Y\=frac(1,1),
+    s(log,X,V0),
+    make_CC_from_func(V0,VX),
+    s(*,VX,Y,V), !.
+s(log,B^N,V) :- 
+    N\=frac(1,1),
+    typeBB(B),
+    B=X^P+F,
+    s(log,frac(1,1)*X^P+F,V0),
+    make_CC_from_func(V0,VX),
+    s(*,N,VX,V), !.
+s(log,X^N,V) :- 
+    N\=frac(1,1),
+    s(log,X,V0),
+    make_CC_from_func(V0,VX),
+    s(*,N,VX,V), !.
+s(log,X*Y,V) :-
+    s(log,X,VX0),
+    s(log,Y,VY0),
+    make_CC_from_func(VX0,VX),
+    make_CC_from_func(VY0,VY),
+    s(+,VX,VY,V), !.
 
 % EXP
-f(exp).
 s(exp,frac(0,1),frac(1,1)) :- !.
+s(exp,X+Y,V) :- 
+    s(exp,X,VX),
+    s(exp,Y,VY),
+    s(*,VX,VY,V), !.
+s(^,EXP,F,V) :-
+    EXP=X*exp(Y)^frac(1,1)+frac(0,1),
+    s(^,X,F,VX),
+    s(*,Y,F,VY),
+    V=VX*exp(VY)^frac(1,1)+frac(0,1), !.
 
-inverz(log,exp) :- !.
-inverz(exp,log) :- !.
+s(*,EXP1,EXP2,V) :- 
+    EXP1=X1*exp(Y1)^frac(1,1)+frac(0,1),
+    EXP2=X2*exp(Y2)^frac(1,1)+frac(0,1),
+    s(*,X1,X2,VX),
+    s(+,Y1,Y2,VY),
+    V=VX*exp(VY)^frac(1,1)+frac(0,1), !.
 
 % SQRT
-f(sqrt).
 s(sqrt,frac(X,Y),V) :-
     X > 0,
     SX is sqrt(X), is_float_int(SX),
@@ -98,6 +129,7 @@ s(sqrt,X^frac(A,B),V) :-
     V=X^frac(A1,B), !.
 s(sqrt,X*Y^frac(A,B)+frac(0,1),V) :-
     s(sqrt,X,SX),
+    (even(A) ; (X\=frac(1,1), \+function(SX))),
     s(sqrt,Y^frac(A,B),SQRT),
     (
         SX=.. [sqrt,_]
@@ -112,9 +144,52 @@ s(sqrt,X*Y^frac(A,B)+frac(0,1),V) :-
             ;  s(*,SX,frac(1,1)*SQRT+frac(0,1),V)
         )
     ), !.
-s(*,sqrt(X),sqrt(Y),sqrt(V)) :- 
-    s(*,X,Y,V), !.
-s(sqrt,X,sqrt(X)) :- !.
+
+s(sqrt,X*Y,V) :-
+    s(sqrt,X,SX),
+    s(sqrt,Y,SY),
+    s(*,SX,SY,V), !.
+
+s(*,Z*sqrt(X),sqrt(Y),sqrt(V)*Z) :- s(*,X,Y,V), !.
+s(*,sqrt(X),sqrt(Y),sqrt(V)) :- s(*,X,Y,V), !.
+s(*,SQRT1,SQRT2,V) :-
+    SQRT1=(sqrt(X)^frac(1,1)+frac(0,1))^frac(1,1),
+    SQRT2=(sqrt(X)^frac(1,1)+frac(0,1))^frac(1,1),
+    s(^,SQRT1,frac(2,1),V), !.
+
+s(*,SQRT1,SQRT2,V) :-
+    SQRT1=(sqrt(X)^frac(1,1)+frac(0,1))^frac(1,1),
+    SQRT2=(sqrt(Y)^frac(1,1)+frac(0,1))^frac(1,1),
+    s(*,X,Y,Z),
+    s(sqrt,Z,SQZ),
+    make_CC_from_func(SQZ,V), !.
+
+s(^,SQRT,frac(A,B),V) :-
+    even(A), A1 is A//2,
+    SQRT=F*sqrt(X)^N+frac(0,1),
+    s(^,F,frac(A,B),VF),
+    s(*,N,frac(A1,B),VN),
+    s(^,X,VN,VX),
+    s(*,VF,VX,V), !.
+
+s(^,SQRT,frac(A,B),V) :-
+    even(A), A1 is A//2,
+    SQRT=(sqrt(X)^frac(1,1)+frac(0,1))^frac(1,1),
+    s(^,X,frac(A1,B),V), !.
+
+s(^,SQRT,frac(A,B),V) :-
+    even(A), A1 is A//2,
+    SQRT=(sqrt(X)^frac(1,1)+frac(0,1))^frac(1,1) * F,
+    s(^,F,frac(A,B),VF),
+    % (
+    %     frac(X)
+    %     -> s(^,X,frac(A1,B),VX)
+    %     ;  VX = (X^frac(1,1)+frac(0,1))^frac(A1,B)
+    % ),
+    s(^,X,frac(A1,B),VX),
+    s(*,VX,VF,V), !.
+% if nothing else matches
+s(Func,X,V) :-V=..[Func,X], !.
 
 % ============ CLASS frac ============
 frac(N) :- N=frac(X,Y), frac(X,Y).
@@ -159,7 +234,6 @@ s(^,F,frac(C,D),V) :-
     % a^(-k) = 1 / a^k
     frac(F), C<0, C1 is -C,
     s(^,F,frac(C1,D),V1),
-    writeln(V1),
     s(/,frac(1,1),V1,V), !. 
 
 
@@ -186,6 +260,17 @@ make_C_from_B(B, C) :-
         E = frac(0,1) 
         -> C = (X^frac(1,1)+E)^N * A
         ;  C = (X^N+E)^frac(1,1) * A
+    ).
+
+make_CC_from_func(Func,CC):-
+    (
+        function(Func)
+        -> CC = frac(1,1)*Func^frac(1,1)+frac(0,1)
+        ; (
+            (Func=Pref*Suff, function(Pref), typeCC(Suff))
+            -> s(*,(Pref^frac(1,1)+frac(0,1))^frac(1,1),Suff,CC)
+            ; CC = Func
+        )
     ).
 
 make_CC_from_X(X^N, CC) :-
@@ -282,6 +367,13 @@ s(*,B,F,B1) :-
 s(*,F,B,B1) :-
     typeB(B), frac(F),
     s(*,B,F,B1), !.
+
+s(^,B,F,B1) :- 
+    typeB(B), frac(F),
+    B = A*X^N + frac(0,1),
+    s(^,A,F,A1),
+    s(*,N,F,N1),
+    B1 = A1*X^N1 + frac(0,1), !.
 s(^,B,F,C) :-
     typeB(B), frac(F),
     make_C_from_B(B,C0),
@@ -309,6 +401,17 @@ s(+,B1,B2,D) :-
     make_CC_from_X(X2, CC2),
     s(+,CC1*A1, CC2*A2, D0),
     s(+,D0, E, D), !.
+
+s(*,B1,B2,B) :-
+    B1=A1*X^N+frac(0,1), 
+    B2=A2*X^M+frac(0,1),
+    s(*,A1,A2,A),
+    s(+,N,M,N1),
+    (
+        N1=0
+        -> B = A
+        ;  B = A*X^N1+frac(0,1)
+    ), !.
 
 s(*,B1,B2,C) :- 
     typeB(B1), typeB(B2),
@@ -678,12 +781,12 @@ simpDebug(V,ZV) :-
     write_char(60,'='),writeln(''),
     simp(ZV1, ZV, 1, n, true).
 
-simp(-V,ZV,_,s,_) :- 
-    simp(V,ZZV,_,s,_), 
+simp(-V,ZV,A,s,Debug) :- 
+    simp(V,ZZV,A,s,Debug), 
     s(*,frac(-1,1),ZZV,ZV),!.
 simp(frac(A,B),-R,_,n,_) :-
     A<0, A1 is -A,
-    simp(frac(A1,B),R,_,n,_), !.
+    simp(frac(A1,B),R,_,n,false), !.
 simp(frac(X,1),X,_,n,_) :- !.
 simp(frac(0,_),0,_,n,_) :- !.
 simp(frac(A,B),A/B,_,n,_) :- !.
@@ -707,12 +810,7 @@ simp(V,ZV,A, Alg, Debug) :-
     A1 is A+1, simp(X,ZX,A1,Alg,Debug),
     (
         Alg=s
-        -> call(s,Func,ZX,ZVV), 
-            (
-                function(ZVV)
-                -> ZV = frac(1,1)*ZVV^frac(1,1)+frac(0,1)
-                ;  ZV = ZVV
-            )
+        -> call(s,Func,ZX,ZVV), make_CC_from_func(ZVV,ZV)
         ;  ZV=.. [Func,ZX]
     ), 
     (
