@@ -105,7 +105,23 @@ s(log,X*Y,V) :-
     make_CC_from_func(VY0,VY),
     s(+,VX,VY,V), !.
 s(log,sqrt(X),V) :-
-    s(*,frac(1,1)*log(X)^frac(1,1)+frac(0,1),frac(1,2),V), !.
+    s(log,X,VX0),
+    make_CC_from_func(VX0,VX),
+    s(*,frac(1,2),VX,V), !.
+    % s(*,frac(1,1)*log(X)^frac(1,1)+frac(0,1),frac(1,2),V), !.
+s(log,SQRT,V) :-
+    SQRT=(sqrt(X)^frac(1,1)+frac(0,1))^frac(1,1),
+    s(log,X,VX0),
+    make_CC_from_func(VX0,VX),
+    s(*,frac(1,2),VX,V), !.
+    % s(*,frac(1,1)*log(X)^frac(1,1)+frac(0,1),frac(1,2),V), !.
+
+s(log,X/Y,V) :-
+    s(log,X,VX0),
+    s(log,Y,VY0),
+    make_CC_from_func(VX0,VX),
+    make_CC_from_func(VY0,VY),
+    s(-,VX,VY,V), !.
 
 % EXP
 s(exp,frac(0,1),frac(1,1)) :- !.

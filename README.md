@@ -117,6 +117,7 @@ X = 1.
 The variable `e` is recognized as the base of the natural logarithm and so `e^x` is equivalent to `exp(x)` in some basic cases. It is however recommended to use `exp` in more complex expressions, as it might simplify further.
 
 - $\log(a\cdot b)=\log(a)+\log(b)$
+- $\log(a / b)=\log(a)-\log(b)$
 - $\log(a^n)=n\log(a)$
 - $\exp(x)^y=\exp(xy)$
 - $\exp(x)\exp(y)=\exp(x+y)$
@@ -129,11 +130,11 @@ $$\log\bigl(2(\sqrt{x})^3\bigr)=\frac{3}{2}\log(x)+\log(2)$$
 X = 3/2*log(x)+log(2).
 ```
 
-$$2\log\bigl(e(x+1)^2\bigr)-2=4\log(x+1)$$
+$$\log\biggl(\frac{a\exp((x+1)^2)}{b\sqrt e}\biggr)=(x+1)^2-\log(b)+\log(a)-\frac{1}{2}$$
 
 ```prolog
-?- simp(2*log(e*(x+1)^2)-2,X).
-X = 4*log(x+1).
+?- simp(log((a*exp((x+1)^2))/(b*sqrt(e))),X).
+X = (x+1)^2-log(b)+log(a)-1/2.
 ```
 
 $$\log\Bigl((x+1)^2\exp\bigl(2\log(x+1)+1\bigr)\Bigr)=4\log(x+1)+1$$
