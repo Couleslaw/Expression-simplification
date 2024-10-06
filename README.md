@@ -165,6 +165,7 @@ X = exp(2*a+b)*a.
 ### Square roots
 
 The square root function is recognized as `sqrt`. Note that `^(1/2)` is equivalent to `sqrt` in some basic cases, but should generally be avoided.
+
 $$\sqrt{(a+2)\cdot4\cdot\sqrt{(b^2-1)^4}(x-1)(1+a+1)}=2(b^2-1)\sqrt{x-1}(a+2)$$
 
 ```prolog
